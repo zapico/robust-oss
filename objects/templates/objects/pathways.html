@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_css %}
+  {% leaflet_js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+<div class="column is-one-third">
+  <div class="box">
+    <div class="block"><span class="tag">Sårbar plats</span></div>
+    <h2 class="title is-2">{{object.name }}</h2>
+    <p>{{object.description }}</p>
+    <div class="columns">
+      <div class="column is-one-third">
+        <p>MALMÖ</p>
+        {% if object.event.returntime %}
+        <h2 class="title is-3">1/{{object.event.returntime }} <br/>år</h2>
+        {% else %}
+        <h2 class="title is-3">-</h2>
+        {% endif %}
+      </div>
+      <div class="column is-one-third">
+        <p>Möh</p>
+        <h2 class="title is-3 has-text-info">{{object.altitude }} meter</h2>
+      </div>
+      <div class="column is-one-third">
+        <p>MARGINAL</p>
+          {% if object.get_margin > 0 %}
+            <h2 class="title is-3 has-text-warning">{{ object.get_margin }} meter</h2>
+          {% else %}
+            <h2 class="title is-3 has-text-danger">{{ object.get_margin }} meter</h2>
+          {% endif %}
+      </div>
+    </div>
+
+
+    <p><b>Framgångskriteria:</b><span class="tag"><a href="/kriterium/{{object.event.criteria.id}}">{{object.event.criteria.name }}</a></span></p>
+    <p><b>Oönskade händelse:</b><span class="tag"><a href="/event/{{object.event.id}}">{{object.event.name }}</a></span></p>
+    <br/>
+    <div class="block">
+    {% leaflet_map "specialbigmap" callback="map_init" %}
+    </div>
+    <button class="button is-info is-rounded" onclick="edit()"><i class="fa-solid fa-pen"></i>&nbsp;Ändra</button>
+    <button class="button is-primary is-rounded" onclick="ny()">Ändra åtgärder</button>
+</div>
+</div>
+
+<div class="column">
+  <div class="box">
+    <h2 class="title is-4">Handlingsvägar</h2>
+
+      {% autoescape off %}
+      {{ plot_path }}
+      {% endautoescape %}
+
+      {%for path in object.pathway_set.all%}
+        <div class="box">
+        <span class="tag is-medium">{{ path.steg1.name }}</span>
+        {%if path.steg2 %}
+          > <span class="tag is-medium">{{ path.steg2.name }}</span>
+        {%endif%}
+        {%if path.steg3 %}
+          > <span class="tag is-medium">{{ path.steg3.name }}</span>
+        {%endif%}
+        <br/>
+        {{ path.description }}<br/>
+        <i>Kostnad:</i> <span class="tag is-info">{{ path.steg1.cost }} {%if path.steg2%} > {{ path.steg2.cost }} {% endif %}{%if path.steg3%}> {{ path.steg3.cost }}{% endif %}</span>
+        <i>Effektivt nivå:</i> <span class="tag is-info">{{ path.steg1.level }} {%if path.steg2%}> {{ path.steg2.level }} {% endif %}{%if path.steg3%}> {{ path.steg3.level }}{% endif %} </span>
+        <p></p>
+        <a href="/pathways/{{object.id}}/{{path.id}}"><button class="button is-small is-link is-rounded"">Ändra</button></a>
+        <a href="/tabort/pathway/{{path.id}}"><button class="button is-small is-link is-rounded has-text-right">Ta bort</button></a>
+        </div>
+      {%endfor%}
+
+
+    </div>
+    <div class="box">
+      {%if path%}
+      <h2 class="title is-4">Editera handlingsväg</h2>
+      {%else%}
+      <h2 class="title is-4">Skapa handlingsväg</h2>
+      {%endif%}
+
+      <form method="POST">
+      {% csrf_token %}
+      <span class="tag">Åtgärd 1:</span> <div class="select">{{ form.steg1 }}</div><br/><br/>
+      <span class="tag">Åtgärd 2:</span> <div class="select">{{ form.steg2 }}</div><br/><br/>
+      <span class="tag">Åtgärd 3:</span> <div class="select">{{ form.steg3 }}</div><br/><br/>
+      {{ form.description }}<br/>
+
+      {%if path%}
+        <button class="button is-info is-rounded" type="submit">Spara handlingsväg</button>
+        <a href="/pathways/{{object.id}}"><button class="button is-link is-rounded"">Ångra</button></a>
+      {%else%}
+        <button class="button is-info is-rounded" type="submit">Skapa handlingsväg</button>
+      {%endif%}
+
+  </div>
+</div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    function map_init(map, options) {
+      var basemaps = {
+          'Nu '       : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '10', format: 'image/png', transparent: true, opacity: 0.5}),
+          '1 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '8', format: 'image/png', transparent: true, opacity: 0.5}),
+          '1.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '7', format: 'image/png', transparent: true, opacity: 0.5}),
+          '2 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '6', format: 'image/png', transparent: true, opacity: 0.5}),
+          '2.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '5', format: 'image/png', transparent: true, opacity: 0.5}),
+          '3 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '4', format: 'image/png', transparent: true, opacity: 0.5}),
+          '3.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '3', format: 'image/png', transparent: true, opacity: 0.5}),
+          '4 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '2', format: 'image/png', transparent: true, opacity: 0.5}),
+          '4.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '1', format: 'image/png', transparent: true, opacity: 0.5}),
+          '5 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '0', format: 'image/png', transparent: true, opacity: 0.5})
+      }
+      L.control.layers(basemaps).addTo(map);
+        var group = new L.featureGroup();
+        {% if object.location.y %}
+          var mark = L.marker([{{ object.location.y }},{{ object.location.x }}]).addTo(map);
+          group.addLayer(mark);
+        {% else %}
+          var jsonob = {% autoescape off %}{{ object.get_location }}{% endautoescape %};
+          var latlngs = jsonob.coordinates[0];
+          var reversed = []
+          function reverseFunction(value, index, array) {
+            reversed += array[index].reverse();
+          }
+          latlngs.forEach(reverseFunction);
+          var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
+          group.addLayer(polygon);
+        {% endif %}
+        map.fitBounds(group.getBounds());
+    }
+
+   function edit() { window.location = '/edit/plats/{{object.id}}' };
+   function ny() { window.location = '/plats/{{object.id}}/' };
+  </script>
+
+
+{% endblock %}

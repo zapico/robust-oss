@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+    <div class="column is-half">
+      <div class="box">
+        <p>Ändra oönskad händelse:</p>
+      <div class="field">
+        <div class="control">
+          <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="button is-success is-fullwidth is-medium mt-5" type="submit">Spara</button>
+          </form>
+        </div>
+      </div>
+      </div>
+      <a href="/event/{{event.id}}"<button class="button is-small is-primary is-rounded utv"">Tillbaka</button></a>
+      <button class="button is-small is-danger is-rounded edt" onclick="tabort()">Ta bort</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+  function back() {
+    window.location = "{{ back }}";
+  }
+  function tabort() {
+    window.location = '/tabort/event/'+ {{event.id}};
+  }
+</script>
+{% endblock %}

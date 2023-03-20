@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_css %}
+  {% leaflet_js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-one-third">
+    <div class="box">
+      <div class="block"><span class="tag">Sårbar plats</span></div>
+      <h2 class="title is-2">{{object.name }}</h2>
+      <p>{{object.description }}</p>
+      <div class="columns">
+        <div class="column is-one-third">
+          <p>MALMÖ</p>
+          {% if object.event.returntime %}
+          <h2 class="title is-3">1/{{object.event.returntime }} <br/>år</h2>
+          {% else %}
+          <h2 class="title is-3">-</h2>
+          {% endif %}
+        </div>
+        <div class="column is-one-third">
+          <p>Möh</p>
+          <h2 class="title is-3 has-text-info">{{object.altitude }} meter</h2>
+        </div>
+        <div class="column is-one-third">
+          <p>MARGINAL</p>
+            {% if margin > 0 %}
+              <h2 class="title is-3 has-text-warning">{{ margin }} meter</h2>
+            {% else %}
+              <h2 class="title is-3 has-text-danger">{{ margin }} meter</h2>
+            {% endif %}
+        </div>
+      </div>
+
+
+      <p><b>Framgångskriteria:</b><span class="tag"><a href="/kriterium/{{object.event.criteria.id}}">{{object.event.criteria.name }}</a></span></p>
+      <p><b>Oönskade händelse:</b><span class="tag"><a href="/event/{{object.event.id}}">{{object.event.name }}</a></span></p>
+      <br/>
+      <div class="block">
+      {% leaflet_map "specialbigmap" callback="map_init" %}
+      </div>
+      <a href="/pathways/{{object.id}}"><button class="button is-info is-rounded"><i class="fa-solid fa-circle-plus"></i>&nbsp; Handlingsvägar</button></a>
+      <button class="button is-info is-rounded" onclick="edit()"><i class="fa-solid fa-pen"></i>&nbsp;Ändra</button><br/><br/>
+      <button class="js-modal-trigger button is-primary is-rounded" data-target="modal-js-example"><i class="fa-solid fa-circle-plus"></i>&nbsp; Lägg till platsspecifik åtgärd</button>
+
+  </div>
+  </div>
+
+  <div class="column">
+    <h2 class="title is-4">Möjliga åtgärder för platsen</h2>
+    {% if object.measure_set.all.count == 0 %}
+      <div class="notification is-info">
+      Skriv in möjliga åtgärder.
+      </div>
+    {%else%}
+      {% for measure in object.measure_set.all %}
+
+      <div class="event_box">
+        <p><b>{{ measure.name }}</b>:{{ measure.description }}</p>
+
+        {% if measure.cost == 1 %}<p>Kostnad: <span class="tag">Billigt</span> {%endif%}
+        {% if measure.cost == 2 %}<p>Kostnad: <span class="tag">Relativt Billigt</span> {%endif%}
+        {% if measure.cost == 3 %}<p>Kostnad: <span class="tag">Mellan</span> {%endif%}
+        {% if measure.cost == 4 %}<p>Kostnad: <span class="tag">Relativt Dyrt</span> {%endif%}
+        {% if measure.cost == 5 %}<p>Kostnad: <span class="tag">Dyrt</span> {%endif%}
+        Effektivt för: <span class="tag is-primary">{{ measure.level }} m</span></p>
+        {% if measure.general == 0 %}
+          <span class="tag is-warning">Platsspecifik</span>
+        {% endif %}
+        <div class="buttons is-right">
+          <a href="/atgard/{{measure.id}}"><button class="button is-small is-link is-rounded">Läs mer</button></a>
+          <a href="/remove/{{measure.id}}/{{object.id}}/"><button class="button is-small is-danger is-rounded">Ta bort från platsen</button></a>
+        </div>
+      </div>
+
+      {% endfor %}
+    {% endif %}
+    <h2 class="title is-4">Lägg till generella åtgärder</h2>
+    {% for measure in generalmeasures %}
+      {% if measure in object.measure_set.all %}
+      {% else %}
+        <div class="event_box">
+          <b>{{ measure.name }}</b>: {{ measure.description }}. <span class="tag is-primary">{{ measure.level }} m</span>
+          <a href="/connect/{{measure.id}}/{{object.id}}/"><button class="button is-small is-link is-rounded edt"">Lägg till</button></a>
+        </div>
+      {% endif %}
+
+    {% endfor %}
+
+    <div id="modal-js-example" class="modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="box">
+          <h2 class="title is-4">Ny möjlig åtgärd för platsen</h2>
+
+          <div class="control">
+            <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <br/>
+            <button class="button is-success is-fullwidth is-medium mt-5" type="submit">Spara</button>
+            </form>
+        </div>
+      </div>
+
+    <button class="modal-close is-large" aria-label="close"></button>
+  </div>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+// Functions to open and close a modal
+function openModal($el) {
+  $el.classList.add('is-active');
+}
+
+function closeModal($el) {
+  $el.classList.remove('is-active');
+}
+
+function closeAllModals() {
+  (document.querySelectorAll('.modal') || []).forEach(($modal) => {
+    closeModal($modal);
+  });
+}
+
+// Add a click event on buttons to open a specific modal
+(document.querySelectorAll('.js-modal-trigger') || []).forEach(($trigger) => {
+  const modal = $trigger.dataset.target;
+  const $target = document.getElementById(modal);
+
+  $trigger.addEventListener('click', () => {
+    openModal($target);
+  });
+});
+
+// Add a click event on various child elements to close the parent modal
+(document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
+  const $target = $close.closest('.modal');
+
+  $close.addEventListener('click', () => {
+    closeModal($target);
+  });
+});
+
+// Add a keyboard event to close all modals
+document.addEventListener('keydown', (event) => {
+  const e = event || window.event;
+
+  if (e.keyCode === 27) { // Escape key
+    closeAllModals();
+  }
+});
+
+
+});
+</script>
+<script type="text/javascript">
+
+    function map_init(map, options) {
+      var basemaps = {
+          'Nu '       : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '10', format: 'image/png', transparent: true, opacity: 0.5}),
+          '1 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '8', format: 'image/png', transparent: true, opacity: 0.5}),
+          '1.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '7', format: 'image/png', transparent: true, opacity: 0.5}),
+          '2 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '6', format: 'image/png', transparent: true, opacity: 0.5}),
+          '2.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '5', format: 'image/png', transparent: true, opacity: 0.5}),
+          '3 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '4', format: 'image/png', transparent: true, opacity: 0.5}),
+          '3.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '3', format: 'image/png', transparent: true, opacity: 0.5}),
+          '4 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '2', format: 'image/png', transparent: true, opacity: 0.5}),
+          '4.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '1', format: 'image/png', transparent: true, opacity: 0.5}),
+          '5 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '0', format: 'image/png', transparent: true, opacity: 0.5}),
+          '100 års flöde' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/karteringar/MapServer/WmsServer', { layers: '14', format: 'image/png', transparent: true, opacity: 0.5}),
+          '200 års flöde' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/karteringar/MapServer/WmsServer', { layers: '13', format: 'image/png', transparent: true, opacity: 0.5})
+      }
+      L.control.layers(basemaps).addTo(map);
+        var group = new L.featureGroup();
+        {% if object.location.y %}
+          var mark = L.marker([{{ object.location.y }},{{ object.location.x }}]).addTo(map);
+          group.addLayer(mark);
+        {% else %}
+          var jsonob = {% autoescape off %}{{ object.get_location }}{% endautoescape %};
+          var latlngs = jsonob.coordinates[0];
+          var reversed = []
+          function reverseFunction(value, index, array) {
+            reversed += array[index].reverse();
+          }
+          latlngs.forEach(reverseFunction);
+          var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
+          group.addLayer(polygon);
+        {% endif %}
+        map.fitBounds(group.getBounds());
+    }
+
+   function edit() { window.location = '/edit/plats/{{object.id}}' };
+   function path() { window.location = '/pathways/{{object.id}}/' };
+   $(document).on('click', '.edt', function() {
+   var id = $(this).data('id');
+   if (id) {
+       window.location = '/edit/measure/' + id;
+   }})
+  </script>
+
+
+{% endblock %}

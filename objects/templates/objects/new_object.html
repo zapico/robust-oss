@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_js plugins="forms" %}
+  {% leaflet_css plugins="forms" %}
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-one-quarter">
+    <div class="box">
+      <h2 class="title is-4">Ny sårbar plats</h2>
+
+      <p>Område: <span class="tag is-info">{{ city.name }}</span></p>
+      <p>Oönskade händelse: <span class="tag is-info">{{ event.name }}</span> </p>
+      <div class="notification is-info">Sårbara platser är sådana som kan knytas till en geografisk punkt eller yta och som har en identifierbar höjd över havet. Platser finns ofta definierade i kommunens risk och sårbarhetsanalyser och eller i klimatanpassningsplaner.</div>
+      <div class="notification is-info">I kartan går att definiera en plats som en punkt genom att sätta en markör på positionen, eller som ett område genom att trycka på pentagonen och rita in punkter.</div>
+    </div>
+      <a href="/event/{{event.id}}"<button class="button is-small is-link is-rounded utv">Tillbaka</button></a>
+  </div>
+
+  <div class="column">
+    <div class="box">
+
+      <div class="control">
+        <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button class="button is-success is-fullwidth is-medium mt-5"
+          type="submit">Spara
+          </button>
+    </form>
+  </div>
+</div>
+</div>
+</div>
+<script type="text/javascript">
+    window.onload = function(){
+      var poly = document.getElementsByClassName("leaflet-draw-draw-polyline");
+      for (let item of poly) {
+        console.log("h")
+        console.log(item);
+        item.parentNode.removeChild(item);
+      }
+      while(poly.length > 0){
+        poly[0].parentNode.removeChild(poly[0]);
+      }
+    }
+    window.addEventListener("map:init", function (e) {
+        var detail = e.detail;
+        detail.map.setView([{{city.location.y}},{{city.location.x}}], 16);
+    }, false);
+    window.addEventListener("map:loadfield", function (e) {
+      console.log("Here");
+    }, false);
+
+
+    function back() {
+      window.location = "/event/{{event.id}}";
+    }
+
+</script>
+{% endblock %}

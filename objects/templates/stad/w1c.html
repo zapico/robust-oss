@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-one-third">
+    <h3 class="title is-3">Workshop 1C: Skyddsnivå och återkomstider.</h3>
+      <div class="box">
+        <h4 class="title is-4">Skyddsnivå</h4>
+        <div class="notification is-primary"><p>Reflektera över vilken maximal vattennivåhöjning (meter) ni vill skydda det definierade området från. Eventuellt kan man här visa några olika scenarier på havsnivåhöjning/nederbörd etc. (om sådana inte redan är kända inom kommunen).</p></div>
+      </div>
+      <div class="box">
+        <h2 class="title is-4">2. Återkomsttider</h2>
+        <div class="notification is-success"><p>Inför nästa workshop ska återkomsttider för <b>befintlig klimat</b> skrivas in. Läs mer på <a href="https://robustklimat.se/vagledning/samla-in-underlag/">Robustklimat.se</a></p></div>
+      </div>
+      <div class="box">
+        <h2 class="title is-4">3. Gå igenom resultatet</h2>
+        <div class="notification is-info">Titta på <a href="/sammanfattning">sammanfattningen</a> och gå igenom översikten av alla framgångskriterier och oönskade händelser.</div>
+      </div>
+      <a href="/sammanfattning"><button class="button is-primary is-rounded is-right">Nästa</button></a>
+  </div>
+
+  <div class="column">
+
+  <h3 class="title is-3">&nbsp;</h3>
+  <div class="box">
+    {% if city.level %}
+      <h4 class="title is-4 has-text-info"> Skyddsnivå</h4>
+      <h2 class="title is-2 ">{{ city.level }} meter</h2>
+
+    {% else %}
+      <h4 class="title is-4">Definiera Skyddsnivå</h4>
+      <div class="notification is-info">Reflektera över hur många meters vattennivåhöjning vill man skydda området för. Utforska i kartan (ikonen längst upp på höger) hur området ser ut under olika vattennivåhöjningar, visa några olika scenarier på havsnivåhöjning/nederbörd etc.</div>
+    {% endif %}
+    <a href="/edit/niva"><button class="button is-info is-rounded">Editera</button></a>
+  </div>
+
+  <div class="box">
+    <h4 class="title is-4">Befintliga återkomsttider</h4>
+    <div class="notification is-info">Skriv in befintliga vattenivå för olika återkomsttider.</div>
+    <a href="/edit/tider"><button class="button is-info is-rounded">Ändra</button></a>
+  </div>
+
+  </div>
+</div>
+
+<script type="text/javascript">
+
+</script>
+
+
+{% endblock %}

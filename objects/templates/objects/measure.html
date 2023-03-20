@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-one-third">
+    <div class="box">
+      <div class="block"><span class="tag">Åtgärd</span></div>
+      <h2 class="title is-2">{{measure.name }}</h2>
+      <p>{{measure.description}}</p>
+      <div class="field is-grouped is-grouped-multiline">
+        <div class="tags has-addons">
+        <span class="tag is-info is-light is-large">Effektivt till:</span>
+        <span class="tag is-info is-large">{{measure.level}} m.</span>
+        </div>
+      </div>
+      <br/>
+      <div class="field is-grouped is-grouped-multiline">
+          <div class="tags has-addons">
+          <span class="tag is-success is-light">Effektivt för:</span><br/>
+          <span class="tag is-success">{{ allobjects|length }} st.</span>
+          <span class="tag is-warning is-light">Ej effektivt för:</span><br/>
+          <span class="tag is-warning">{{ no_objects|length }} st.</span>
+          </div>
+        </div>
+        <br/>
+      <div class="field is-grouped is-grouped-multiline">
+        <div class="tags has-addons">
+          <span class="tag is-info is-light">Platsspecifik:</span>
+            {% if measure.general %}
+              <span class="tag">NEJ</span>
+            {% else %}
+              <span class="tag">JA</span>
+            {% endif %}
+          </div>
+        </div>
+        <br/>
+        <div class="field is-grouped is-grouped-multiline">
+          <div class="tags has-addons">
+              <span class="tag is-info is-light">Kostnadsuppskattning: </span>
+              {% if measure.cost == 1 %}<span class="tag">Billigt</span> {%endif%}
+              {% if measure.cost == 2 %}<span class="tag">Relativt Billigt</span> {%endif%}
+              {% if measure.cost == 3 %}<span class="tag">Mellan</span> {%endif%}
+              {% if measure.cost == 4 %}<span class="tag">Relativt Dyrt</span> {%endif%}
+              {% if measure.cost == 5 %}<span class="tag">Dyrt</span> {%endif%}
+        </div>
+      </div>
+      <br/>
+
+
+
+
+
+        <br/><br/>
+        <a href="/edit/measure/{{measure.id}}"><button class="button is-link is-rounded"><i class="fa-solid fa-pen"></i>&nbsp;Ändra</button></a><br/><br/>
+    </div>
+  </div>
+  <div class="column">
+    <div class="box">
+              <h5 class="title is-5"><b>Effektiv för sårbara platser: </b></h5>
+              {%for ob in allobjects%}
+              <a href="/plats/{{ob.id}}">
+                <div class="field is-grouped is-grouped-multiline" style="margin-bottom:0px;">
+
+                <div class="control" >
+                  <div class="tags has-addons">
+                    <span class="tag" style="width:300px"><b>{{ob.name|truncatechars:50}}</b></span>
+                  </div>
+                </div>
+
+                <div class="control">
+                  <div class="tags has-addons">
+                    <span class="tag">Marginal:</span>
+                    {% if ob.margin <= 0 %}
+                      <span class="tag is-danger" style="width:60px">{{ob.margin}} m.</span>
+                    {% elif ob.margin <= 1 %}
+                      <span class="tag is-warning" style="width:60px">{{ob.margin}} m.</span>
+                    {% else %}
+                      <span class="tag is-success" style="width:60px">{{ob.margin}} m.</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="control">
+                  <div class="tags has-addons">
+                    <span class="tag">Efter åtgärd :</span>
+                    {% if ob.newmargin <= 0 %}
+                      <span class="tag is-danger" style="width:60px">{{ob.newmargin}} m.</span>
+                    {% else %}
+                      <span class="tag is-success" style="width:60px">{{ob.newmargin}} m.</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+              </div>
+              {% endfor %}
+    </div>
+    <div class="box">
+      <h5 class="title is-5"><b>Inte effektiv för sårbara platser: </b></h5>
+              {%for ob in no_objects%}
+              <a href="/plats/{{ob.id}}">
+                <div class="field is-grouped is-grouped-multiline" style="margin-bottom:0px;">
+
+                <div class="control" >
+                  <div class="tags has-addons">
+                    <span class="tag" style="width:300px"><b>{{ob.name|truncatechars:50}}</b></span>
+                  </div>
+                </div>
+
+                <div class="control">
+                  <div class="tags has-addons">
+                    <span class="tag">Marginal:</span>
+                    {% if ob.margin <= 0 %}
+                      <span class="tag is-danger" style="width:60px">{{ob.margin}} m.</span>
+                    {% elif ob.margin <= 1 %}
+                      <span class="tag is-warning" style="width:60px">{{ob.margin}} m.</span>
+                    {% else %}
+                      <span class="tag is-success" style="width:60px">{{ob.margin}} m.</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

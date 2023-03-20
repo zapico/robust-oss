@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-half">
+    <div class="box">
+      <h2 class="title is-3">Ändra åtgärd</h2>
+      <div class="field">
+        <div class="control">
+          <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="button is-success is-fullwidth is-medium mt-5" type="submit">Spara</button>
+          </form>
+          </div>
+        </div>
+      </div>
+      <a href="{{back}}"><div class="button is-info is-rounded is-small">Tillbaka</div></a>
+      <button class="button is-danger is-rounded is-small" onclick="tabort()">Ta bort</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+  function tabort() {
+    window.location = "/tabort/measure/{{measure.id}}"
+  }
+</script>
+{% endblock %}

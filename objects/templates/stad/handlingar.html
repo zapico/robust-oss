@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="columns">
+<div class="column is-one-half">
+    <div class="box">
+      <h2 class="title is-2">Åtgärder</h2>
+      {% for ob in city.object_set.all %}
+        {% for m in ob.measure_set.all %}
+        <div class="box">
+          <h3 class="title is-4">{{ m.name }}</h3>
+          <p>{{ m.description }}</p>
+        </div>
+        {% endfor %}
+      {% endfor %}
+      {% for ob in city.area_set.all %}
+        {% for m in ob.measure_set.all %}
+        <div class="cr_block">
+          <h3 class="title is-4">{{ m.name }}</h3>
+          <p>{{ m.description }}</p>
+        </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+</div>
+
+<div class="column is-one-half">
+</div>
+
+</div>
+
+{% endblock %}

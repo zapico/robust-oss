@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-one-third">
+    <div class="box">
+      <div class="block"><span class="tag">Framgångskriteria</span></div>
+      <h3 class="title is-3">{{ criteria.name }}</h3>
+      <p>{{ criteria.description }}</p>
+      <a href="/edit/kriteria/{{criteria.id}}"><button class="button is-link is-small is-rounded"><i class="fa-solid fa-pen"></i>&nbsp; Ändra</button></a>
+    </div>
+    <a href="/handelser"><button class="button is-info is-small is-rounded"><i class="fa-solid fa-angle-left"></i>&nbsp; Tillbaka till alla händelser</button></a>
+
+
+
+
+    </div>
+
+  <div class="column is-one-third">
+    <div class="box">
+    <p><i class="fa-solid fa-house-flood-water"></i><b> {{ criteria.event_set.count }} oönskade händelser</b></p>
+    {% for ev in criteria.event_set.all %}
+    <a href="/event/{{ev.id}}">
+      <div class="event_box">
+        <p><b>{{ ev.name }}</b><br/> {{ ev.description}}</p>
+        <div class="field is-grouped is-grouped-multiline">
+          <div class="control"><div class="tags has-addons"><span class="tag is-info is-light">MALMÖ: </span><span class="tag is-info">{%if ev.returntime %}1/{{ ev.returntime }}{%else%} ej klar.{%endif%}</span></div></div>
+          <div class="control"><div class="tags has-addons"><span class="tag is-info is-light">Sårbara platser: </span><span class="tag is-info">{{ ev.object_set.count }}</span></div></div>
+
+        </div>
+      </div>
+    </a>
+    {% endfor%}
+  </div>
+  </div>
+  <div class="column is-one-third">
+    <div class="box">
+      <h2 class="title is-4">Ny oönskade händelse</h2>
+      <div class="notification is-info">
+      Oönskade händelser är sådant man inte vill ska hända om framgångskriterierna ska uppnås och därför ska de matcha dessa. Skriv in förslag och sortera bort de som inte är relevanta för översvämning.
+      </div>
+
+
+      <div class="control">
+        <form method="post">
+        {% csrf_token %}
+        {{ form.name.name_tag }}
+        {{ form.name }}
+        <br/><br/>
+        {{ form.description.name_tag }}
+        {{ form.description }}
+        <br/>
+        <button class="button is-success is-fullwidth is-medium mt-5" type="submit"><i class="fa-solid fa-circle-plus"></i>&nbsp; Spara</button>
+        </form>
+        </div>
+    </div>
+
+
+    </div>
+</div>
+</div>
+
+<script type="text/javascript">
+  $(document).on('click', '.utv', function() {
+  var id = $(this).data('id');
+  if (id) {
+      window.location = '/event/' + id;
+  }})
+  $(document).on('click', '.edt', function() {
+  var id = $(this).data('id');
+  if (id) {
+      window.location = '/edit/event/' + id;
+  }})
+  function back() {
+    window.location = "{{ back }}"
+  }
+</script>
+
+{% endblock %}

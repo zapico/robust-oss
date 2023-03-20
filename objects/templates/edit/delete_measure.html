@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-half">
+    <div class="box">
+    {% if used > 0 %}
+      <p>Åtgärden <b>{{ measure.name }}</b> används i en handlingsväg. Ändra handlingsvägen innan du tar bort åtgärden.
+    {% else %}
+      <form method="post" action="">
+         {% csrf_token %}
+           <h2 class="title is-2">Är det säkert du vill ta bort oänskade åtgärden: {{ measure.name }}</h2><br>
+           <input class="button is-danger is-medium" type="submit" value="Ja" />
+
+      </form>
+    {% endif %}
+    </div>
+    <a href="/edit/measure/{{measure.id}}"><div class="button is-info is-rounded is-small">Tillbaka</div></a>
+  </div>
+</div>
+{% endblock %}

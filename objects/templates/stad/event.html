@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_css %}
+  {% leaflet_js %}
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-one-quarter">
+    <div class="box">
+      <div class="block"><span class="tag">Oönskade händelse</span></div>
+    <h3 class="title is-3">{{ event.name }}</h3>
+    <p><b>Beskrivning:</b> {{ event.description }}</p>
+    <p>Framgångskriteria: <span class="tag cr" ><a href="/kriterium/{{event.criteria.id}}">{{ event.criteria.name }}</a></span> </p>
+    <br/>
+    {% if event.returntime %}
+    <h5 class="title is-5"><b>MALMÖ</b>: 1/{{ event.returntime}}</h5>
+        <form method="post">
+          {% csrf_token %}
+          <div class="select">{{ form.returntime }}</div>
+          <button class="button is-primary is-small " type="submit">Uppdatera</button>
+        </form>
+      {% else %}
+      <h5 class="title is-5"><b>MALMÖ</b>:</h5>
+      <p><b>Minsta Acceptabel tidsLängd Mellan Översvämningar (MALMÖ)</b> är bedömning av den acceptabel sannolikhet att en oönskad händelse inträffar. T.ex sannolikhet på 1/20 beskriver en händelse som i genomsnitt beräknas inträffa en gång var 20:e år. </p>
+          <form method="post">
+            {% csrf_token %}
+            <div class="select">{{ form.returntime }}</div>
+            <button class="button is-primary is-small " type="submit">Spara MALMÖ</button>
+          </form>
+
+
+      {% endif %}
+    <br/>
+    <h5 class="title is-5"><b>Sårbara platser: {{ event.object_set.count }}</b></h5>
+    {%for ob in allobjects%}
+         <a href="/plats/{{ob.id}}">
+           <div class="event_box" style="padding-bottom:25px;">
+               <div class="field is-grouped is-grouped-multiline">
+                 <b>{{ob.name}} &nbsp;</b>
+                 <div class="tags has-addons">
+                   <span class="tag is-info is-light">Marginal: </span>{%if ob.margin > 0 %}<span class="tag is-info">{%else%}<span class="tag is-danger">{%endif%} {{ob.margin}} m.</span></div>
+                </div>
+          </div>
+        </a>
+    {% endfor %}
+    <button class="button is-primary is-rounded" onclick="newob()"><i class="fa-solid fa-circle-plus"></i>&nbsp; Ny sårbar plats</button>
+    </div>
+    <a href="/edit/event/{{event.id}}"><button class="button is-link is-small is-rounded"><i class="fa-solid fa-pen"></i>&nbsp; Ändra</button></a>
+    <a href="/handelser"><button class="button is-info is-small is-rounded"><i class="fa-solid fa-angle-left"></i>&nbsp; Tillbaka till alla händelser</button></a>
+
+  </div>
+  <div class="column">
+    {% leaflet_map "specialbigmap" callback="map_init" %}
+  </div>
+</div>
+<script type="text/javascript">
+
+    function map_init(map, options) {
+        // get point lat and lon
+        // zoom to point & add it to map
+        var basemaps = {
+          'Nu '       : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '10', format: 'image/png', transparent: true, opacity: 0.5}),
+          '1 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '8', format: 'image/png', transparent: true, opacity: 0.5}),
+          '1.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '7', format: 'image/png', transparent: true, opacity: 0.5}),
+          '2 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '6', format: 'image/png', transparent: true, opacity: 0.5}),
+          '2.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '5', format: 'image/png', transparent: true, opacity: 0.5}),
+          '3 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '4', format: 'image/png', transparent: true, opacity: 0.5}),
+          '3.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '3', format: 'image/png', transparent: true, opacity: 0.5}),
+          '4 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '2', format: 'image/png', transparent: true, opacity: 0.5}),
+          '4.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '1', format: 'image/png', transparent: true, opacity: 0.5}),
+          '5 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '0', format: 'image/png', transparent: true, opacity: 0.5}),
+          '100 års flöde' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/karteringar/MapServer/WmsServer', { layers: '14', format: 'image/png', transparent: true, opacity: 0.5}),
+          '200 års flöde' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/karteringar/MapServer/WmsServer', { layers: '13', format: 'image/png', transparent: true, opacity: 0.5})
+        }
+        L.control.layers(basemaps).addTo(map);
+        var group = new L.featureGroup();
+        var lon = "{{ city.location.x }}";
+        var lat = "{{ city.location.y }}";
+        // zoom to point & add it to map
+        map.setView([lat, lon], 14);
+        {% for object in event.object_set.all %}
+          {% if object.location.y %}
+            var mark = L.marker([{{ object.location.y }},{{ object.location.x }}]).addTo(map);
+            mark.bindPopup("<h2>{{ object.name }}</h2><p>{{ object.description|linebreaksbr }}</p><p><a href='../../plats/{{ object.id }}'>Skapa åtgärder</a></p>");
+            group.addLayer(mark);
+          {% else %}
+            var jsonob = {% autoescape off %}{{ object.get_location }}{% endautoescape %};
+            var latlngs = jsonob.coordinates[0];
+            var reversed = []
+            function reverseFunction(value, index, array) {
+              reversed += array[index].reverse();
+            }
+            latlngs.forEach(reverseFunction);
+            var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
+            polygon.bindPopup("<h2>{{ object.name }}</h2><p>{{ object.description|linebreaksbr }}</p><p><a href='../../plats/{{ object.id }}'>Skapa åtgärder</a></p>");
+
+            group.addLayer(polygon);
+          {% endif %}
+        {% endfor %}
+        map.fitBounds(group.getBounds());
+    }
+
+      function back() {
+        window.location = '/workshop2'
+      }
+      function newob() {
+        window.location = '/nytt_objekt/{{event.id}}'
+      }
+
+  </script>
+
+{% endblock %}

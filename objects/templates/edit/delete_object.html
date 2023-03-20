@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-half">
+    <div class="box">
+    {% if object.measure_set.count > 0 %}
+      <p>Sårbara platsen <b>{{ object.name }}</b> har {{ object.measure_set.count }} koppplade åtgärder. Ta bort de innan du tar bort framgångskriterian.
+    {% else %}
+      <form method="post" action="">
+         {% csrf_token %}
+           <h2 class="title is-2">Är det säkert du vill ta bort platsen: {{ object.name }}</h2><br>
+           <input class="button is-danger is-medium" type="submit" value="Ja" />
+
+      </form>
+    {% endif %}
+    </div>
+    <a href="/edit/plats/{{object.id}}"><div class="button is-info is-rounded is-small">Tillbaka</div></a>
+  </div>
+</div>
+{% endblock %}

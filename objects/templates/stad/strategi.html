@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_css %}
+  {% leaflet_js %}
+{% endblock %}
+{% block content %}
+
+<div class="columns">
+  <div class="column is-one-quarter">
+    <div class="box">
+      <small class="has-text-info">Fokusfråga </small><br/>
+      <h5 class="title is-5">{{ city.focus }}</h5>
+      <small class="has-text-info">Skyddsnivå</small><br/>
+      <h5 class="title is-5">{{ city.level }} meter</h5>
+        <small class="has-text-info">Område</small><br/>
+      <div class="block">
+        {% leaflet_map "specialbigmap" callback="map_init" %}
+      </div>
+      <small class="has-text-info">Befintliga återkomstider</small><br/>
+      {% if city.returntimes_set.first.y1 > 0 %}
+      <span class="tag is-success is-light">Färdiga</span>
+      {% else %}
+      <span class="tag is-warning is-light">Inte färdiga.</span>
+      {% endif %}
+      <br/><br/>
+      <a href="/edit/information"><button class="button is-small is-link is-rounded"><i class="fa-solid fa-pen"></i>&nbsp; Ändra informationen</button></a>
+    </div>
+      <button class="js-modal-trigger button is-primary is-rounded" data-target="modal-js-example"><i class="fa-solid fa-circle-plus"></i>&nbsp; Lägg till framgångskriteria</button>
+  </div>
+
+  <div class="column">
+    {% if city.criteria_set.all.count > 0 %}
+    {% for cr in city.criteria_set.all %}
+    <div class="box">
+    <div class="columns" style="padding:0px;">
+      <div class="column is-one-third">
+        <p><small class="has-text-primary">Framgångskriteria</small><br/><b>{{ cr.name }}:</b>
+        <small>{{ cr.description }}</small></p>
+        <a href="/kriterium/{{cr.id}}"><button class="button is-small is-primary is-rounded"><i class="fa-solid fa-circle-plus"></i>&nbsp; Lägg till oönskade händelse</button></a>
+      </div>
+      <div class="column">
+        <div style="margin-bottom:8px;"><small><i class="fa-solid fa-house-flood-water"></i> {{ cr.event_set.count }} oönskade händelser</small></div>
+        {% for ev in cr.event_set.all %}
+        <a href="/event/{{ev.id}}">
+          <div class="event_box" style="padding:8px;">
+
+            <div class="field is-grouped is-grouped-multiline">
+              <span style="width:50%;text-align:left;"><b>{{ ev.name }}</b></span>
+
+              <div class="control"><div class="tags has-addons"><span class="tag is-info is-light">MALMÖ: </span><span class="tag is-info">{%if ev.returntime %}1/{{ ev.returntime }}{%else%} ej klar.{%endif%}</span></div></div>
+              <div class="control"><div class="tags has-addons"><span class="tag is-info is-light">Sårbara platser: </span><span class="tag is-info">{{ ev.object_set.count }}</span></div></div>
+
+            </div>
+          </div>
+        </a>
+        {% endfor%}
+      </div>
+    </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+  </div>
+
+
+<div id="modal-js-example" class="modal">
+  <div class="modal-background"></div>
+
+  <div class="modal-content">
+    <div class="box">
+      <h2 class="title is-4">Definiera framgångskriteria</h2>
+      <div class="notification is-info"><p>Framgångskriterier är konkreta påståenden om vilka förhållanden som ska infrias för att utvecklingen av området ska uppfylla kriterierna i fokusfrågan.</p></div>
+      <div class="control">
+        <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="button is-success is-fullwidth is-medium mt-5"
+            type="submit">Spara
+        </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <button class="modal-close is-large" aria-label="close"></button>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).on('click', '.evt', function() {
+    var id = $(this).data('id');
+    if (id) {
+        window.location = '/event/' + id;
+    }})
+
+      function map_init(map, options) {
+          // get point lat and lon
+          // zoom to point & add it to map
+          var basemaps = {
+            'Nu '       : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '10', format: 'image/png', transparent: true, opacity: 0.5}),
+            '1 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '8', format: 'image/png', transparent: true, opacity: 0.5}),
+            '1.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '7', format: 'image/png', transparent: true, opacity: 0.5}),
+            '2 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '6', format: 'image/png', transparent: true, opacity: 0.5}),
+            '2.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '5', format: 'image/png', transparent: true, opacity: 0.5}),
+            '3 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '4', format: 'image/png', transparent: true, opacity: 0.5}),
+            '3.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '3', format: 'image/png', transparent: true, opacity: 0.5}),
+            '4 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '2', format: 'image/png', transparent: true, opacity: 0.5}),
+            '4.5 meter' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '1', format: 'image/png', transparent: true, opacity: 0.5}),
+            '5 meter  ' : L.tileLayer.wms('https://gisapp.msb.se/arcgis/services/Oversvamningskarteringar/kustoversvamning/MapServer/WmsServer', { layers: '0', format: 'image/png', transparent: true, opacity: 0.5})
+          }
+          L.control.layers(basemaps).addTo(map);
+          var group = new L.featureGroup();
+          var lon = "{{ city.location.x }}";
+          var lat = "{{ city.location.y }}";
+          // zoom to point & add it to map
+          map.setView([lat, lon], 14);
+          {% if city.area %}
+          var jsonob = {% autoescape off %}{{ city.get_location }}{% endautoescape %};
+          var latlngs = jsonob.coordinates[0];
+          var reversed = []
+          function reverseFunction(value, index, array) {
+              reversed += array[index].reverse();
+            }
+          latlngs.forEach(reverseFunction);
+          var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
+          group.addLayer(polygon);
+          map.fitBounds(group.getBounds());
+          {% endif %}
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+  // Functions to open and close a modal
+  function openModal($el) {
+    $el.classList.add('is-active');
+  }
+
+  function closeModal($el) {
+    $el.classList.remove('is-active');
+  }
+
+  function closeAllModals() {
+    (document.querySelectorAll('.modal') || []).forEach(($modal) => {
+      closeModal($modal);
+    });
+  }
+
+  // Add a click event on buttons to open a specific modal
+  (document.querySelectorAll('.js-modal-trigger') || []).forEach(($trigger) => {
+    const modal = $trigger.dataset.target;
+    const $target = document.getElementById(modal);
+
+    $trigger.addEventListener('click', () => {
+      openModal($target);
+    });
+  });
+
+  // Add a click event on various child elements to close the parent modal
+  (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
+    const $target = $close.closest('.modal');
+
+    $close.addEventListener('click', () => {
+      closeModal($target);
+    });
+  });
+
+  // Add a keyboard event to close all modals
+  document.addEventListener('keydown', (event) => {
+    const e = event || window.event;
+
+    if (e.keyCode === 27) { // Escape key
+      closeAllModals();
+    }
+  });
+});
+  </script>
+
+{% endblock %}

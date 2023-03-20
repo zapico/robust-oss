@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-half">
+    <div class="box">
+    {% if event.object_set.count > 0 %}
+      <p>Oänskade händelsen <b>{{ event.name }}</b> har {{ event.object_set.count }} koppplade sårbara platser. Ta bort de innan du tar bort framgångskriterian.
+    {% else %}
+      <form method="post" action="">
+         {% csrf_token %}
+           <h2 class="title is-2">Är det säkert du vill ta bort oänskade händelsen: {{ event.name }}</h2><br>
+           <input class="button is-danger is-medium" type="submit" value="Ja" />
+
+      </form>
+    {% endif %}
+    </div>
+    <a href="/edit/event/{{event.id}}"><div class="button is-info is-rounded is-small">Tillbaka</div></a>
+  </div>
+</div>
+{% endblock %}

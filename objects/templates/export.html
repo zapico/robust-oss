@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_css %}
+  {% leaflet_js %}
+{% endblock %}
+{% block content %}
+<div class="columns">
+  <div class="column is-one-third">
+    <div class="box">
+      <h2 class="title is-2">Exportera data</h2>
+      <a href="/export/platser"><button class="button is-medium is-round is-info"><i class="fa-solid fa-file-arrow-down"></i>&nbsp; Ladda ner alla platser</button></a><br/><br/>
+      <div class="notification">
+        Datan laddas ner som en CSV fil (Tab-delimited). I Excel kan man läsa sådana filer genom att trycka på Arkiv>Importera>CSV. <a href="https://support.microsoft.com/sv-se/office/importera-data-fr%C3%A5n-en-csv-html-eller-textfil-b62efe49-4d5b-4429-b788-e1211b5e90f6" targe="_blank">Läs mer här</a>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+{% endblock %}

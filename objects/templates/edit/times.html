@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-one-third">
+    <div class="box">
+      <h2 class="title is-3">Definiera Befintliga återkomstider</h2>
+      <div class="notification is-info"><b>Skriv havsnivå i meter för olika återkomstider baserad på de befintliga observationer för översvämningar. Läs mer</div>
+    </div>
+          <a href="/edit/information"><button class="button is-info is-rounded"><i class="fa-solid fa-angle-left"></i>&nbsp; Tillbaka</button></a>
+  </div>
+  <div class="column">
+    <div class="box">
+      <form method="post">
+        {% csrf_token %}
+
+            <table>
+              {{ form }} <!-- Notice this -->
+            </table>
+            <button class="button is-success is-fullwidth is-medium mt-5" type="submit">Spara</button>
+        </form>
+      </div>
+    </div>
+</div>
+
+{% endblock %}

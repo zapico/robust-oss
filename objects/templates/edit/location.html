@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_js plugins="forms" %}
+  {% leaflet_css plugins="forms" %}
+{% endblock %}
+{% block content %}
+<div class="columns">
+  <div class="column is-one-third">
+    <div class="box">
+      <h2 class="title is-3">Definiera område</h2>
+      <div class="notification is-info">
+        <p>Definiera området som är känsligt för översvämning och som ni vill jobba med i kartan.</p>
+        <p>Tryck på "pentagonen" på kartan och rita ett område genom att placera punkter.</p>
+      </div>
+      </div>
+      <button class="button is-info is-rounded" onclick="back()">Tillbaka</button>
+  </div>
+  <div class="column">
+      <div class="box">
+      <div class="field">
+        <div class="control">
+          <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="button is-success is-fullwidth is-medium mt-5" type="submit">Spara</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function back() {
+    window.location = '/workshop1A'
+  }
+  window.onload = function(){
+    var poly = document.getElementsByClassName("leaflet-draw-draw-polyline");
+    for (let item of poly) {
+      item.parentNode.removeChild(item);
+    }
+  }
+  window.addEventListener("map:init", function (e) {
+      var detail = e.detail;
+      detail.map.setView([{{city.location.y}},{{city.location.x}}], 16);
+  }, false);
+</script>
+{% endblock %}

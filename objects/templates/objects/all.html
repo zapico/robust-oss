@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_css %}
+  {% leaflet_js %}
+{% endblock %}
+
+{% block content %}
+
+<div class="columns">
+  <div class="column is-one-quarter">
+    <div class="box">
+        <h2 class="title is-2">Sårbara platser</h2>
+        <div class="columns">
+          <div class="column is-one-third">
+            <p>TOTAL<br/>&nbsp;</p>
+            <h2 class="title is-3">{{ total }}</h2>
+          </div>
+          <div class="column is-one-third">
+            <p>UTAN MARGINAL</p>
+            <h2 class="title is-3 has-text-danger">{{ akut }}</h2>
+          </div>
+          <div class="column is-one-third">
+            <p>UTAN ÅTGÄRD</p>
+            <h2 class="title is-3 has-text-warning">{{ utan }}</h2>
+          </div>
+        </div>
+        <a href="malmo"><button class="button is-medium is-link is-info"><i class="fa-solid fa-sort"></i>&nbsp; MALMÖ</button></a><br/><br/>
+        <a href="marginal"><button class="button is-medium is-link is-info"><i class="fa-solid fa-sort"></i>&nbsp; Marginal</button></a><br/><br/>
+        <a href="atgard"><button class="button is-medium is-link is-info"><i class="fa-solid fa-sort"></i>&nbsp; Åtgärder</button></a><br/>
+    </div>
+  </div>
+  <div class="column">
+        <div class="box">
+    {% if allobjects.count != 0 %}
+      {%for ob in allobjects%}
+        <a href="/plats/{{ob.id}}">
+          <div class="field is-grouped is-grouped-multiline" style="margin-bottom:0px;">
+
+          <div class="control" >
+            <div class="tags has-addons">
+              <span class="tag" style="width:300px"><b>{{ob.name}}</b></span>
+            </div>
+          </div>
+
+          <div class="control">
+            <div class="tags has-addons">
+              <span class="tag">MALMÖ: </span>
+              {% if ob.malmo >= 1000 %}
+                <span class="tag is-link" style="width:80px">1/{{ob.malmo}}</span>
+                {% elif ob.malmo >= 100 %}
+                  <span class="tag is-info" style="width:80px">1/{{ob.malmo}}</span>
+                {% elif ob.malmo > 0 %}
+                    <span class="tag is-primary" style="width:80px">1/{{ob.malmo}}</span>
+                {% else %}
+                <span class="tag" style="width:80px">Ej</span>
+
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="control">
+            <div class="tags has-addons">
+              <span class="tag">Marginal:</span>
+              {% if ob.margin <= 0 %}
+                <span class="tag is-danger" style="width:60px">{{ob.margin}} m.</span>
+              {% elif ob.margin <= 1 %}
+                <span class="tag is-warning" style="width:60px">{{ob.margin}} m.</span>
+              {% else %}
+                <span class="tag is-success" style="width:60px">{{ob.margin}} m.</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="control">
+            <div class="tags has-addons">
+              {% if ob.need == 1 %}
+                  <span class="tag is-warning">Egen åtgärd</span>
+              {% endif %}
+              {% if ob.need == 2 %}
+                <span class="tag is-warning">Ingen åtgärd</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+
+                </a>
+        {%endfor%}
+      {% else %}
+          <a href="/handelser"><div class="event_box">
+        <p>Inga sårbara platser ännu. Lägg till sårbara platser i respektive oönskade händelse.</p>
+        </div></a>
+
+      {% endif %}
+      </div>
+  </div>
+
+</div>
+
+{% endblock %}

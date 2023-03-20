@@ -1,0 +1,17 @@
+.leaflet-container {  /* all maps */
+    width:  600px;
+    height: 400px;
+}
+
+#specialbigmap {
+    height: 80%;
+    width: 100%;
+}
+
+/* Resize the "display_raw" textbox */
+.django-leaflet-raw-textarea {
+    width: 100%;
+}
+p{
+  padding-bottom: 12px;
+}

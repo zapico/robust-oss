@@ -1,0 +1,5 @@
+#Added gitignore
+objects/__pycache__/*
+robusta/__pycache__/*
+#robusta/settings.py
+vagledning/*

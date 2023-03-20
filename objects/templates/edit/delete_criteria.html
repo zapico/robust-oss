@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-half">
+    <div class="box">
+    {% if criteria.event_set.count > 0 %}
+      <p>Framgångskriteria <b>{{ criteria.name }}</b> har {{ criteria.event_set.count }} koppplade oänskade händelser. Ta bort de innan du tar bort framgångskriterian.
+    {% else %}
+      <form method="post" action="">
+         {% csrf_token %}
+           <h2 class="title is-2">Är det säkert du vill ta bort framgångskriteria: {{ criteria.name }}</h2><br>
+           <input class="button is-danger is-medium" type="submit" value="Ja" />
+
+      </form>
+    {% endif %}
+    </div>
+    <a href="/edit/kriteria/{{criteria.id}}"><div class="button is-info is-rounded is-small">Tillbaka</div></a>
+  </div>
+</div>
+
+{% endblock %}

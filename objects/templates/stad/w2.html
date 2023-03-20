@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+
+  <div class="column is-one-third">
+  <h3 class="title is-3">Workshop 2</h3>
+  <div class="box">
+    <p>Navigera genom alla skapade oönskade händelser och komplettera med följande uppgifter:</p>
+    <div class="notification is-info">
+    <h4 class="title is-4">2A. MALMÖ</h4>
+    <p>Uppgift 1 är att definiera den Minsta Acceptabla tidsLängd Mellan Översvämningar (MALMÖ) för alla oönskade händelser, det vill säga hur ofta det är acceptabelt att en oönskad händelse inträffar.</p>
+    </div>
+    <div class="notification is-success">
+    <h4 class="title is-4">2B. Sårbara platser</h4>
+    <p>Uppgift 2 är att specificera sårbara platser (objekt eller ytor) för respektive oönskad händelse och identifiera deras höjd över havet.
+    </div>
+    <div class="notification is-primary">
+    <h4 class="title is-4">2C. Åtgärder</h4>
+    <p>Uppgift 3 är att definiera åtgärder för varje sårbar plats. Alternativt kan generella åtgärder skapas som fungerar för hela området.</p>
+    </div>
+    <a href="/ny_atgard"><button class="button is-info is-rounded">Skapa generell åtgärd</button></a>
+    </div>
+  </div>
+
+  <div class="column">
+    <h3 class="title is-3">&nbsp;</h3>
+  <div class="box">
+    <h2 class="title is-4">Oönskade händelser</h2>
+    {% for ev in city.event_set.all %}
+      <div class="box">
+        <p><b>{{ ev.name }}</b></p><p>{{ ev.description }}</p>
+        <p>Framgångskriteria: <span class="tag">{{ ev.criteria.name }}</span></p>
+        <p>MALMÖ: <span class="tag">{%if ev.returntime %}1/{{ ev.returntime }}{%else%} ej klar.{%endif%}</span>  Sårbara platser: <span class="tag">{{ ev.object_set.count }}</span></p>
+        <button class="button is-small is-primary is-rounded utv" data-id="{{ ev.id }}">Utveckla</button>
+        <button class="button is-small is-link is-rounded edt" data-id="{{ ev.id }}">Ändra</button>
+      </div>
+    {% endfor %}
+  </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).on('click', '.utv', function() {
+    var id = $(this).data('id');
+    if (id) {
+        window.location = '/event/' + id;
+    }})
+    $(document).on('click', '.edt', function() {
+    var id = $(this).data('id');
+    if (id) {
+        window.location = '/edit/event/' + id;
+    }})
+  </script>
+
+
+{% endblock %}

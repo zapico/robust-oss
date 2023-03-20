@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_css %}
+  {% leaflet_js %}
+{% endblock %}
+{% block content %}
+
+<div class="columns">
+
+  <div class="column is-one-third">
+    <h3 class="title is-3">Workshop 1B</h3>
+    <div class="box">
+      <h2 class="title is-4">1. Definiera framgångskriterier</h2>
+      <div class="notification is-info"><p>Framgångskriterier är konkreta påståenden om vilka förhållanden som ska infrias för att utvecklingen av området ska uppfylla kriterierna i fokusfrågan.</p></div>
+      <div class="control">
+        <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="button is-success is-fullwidth is-medium mt-5"
+            type="submit">Spara
+        </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2 class="title is-4">2. Identifiera oönskade händelser</h2>
+      <div class="notification is-info">
+         Oönskade händelser är sådant man inte vill ska hända om framgångskriterierna ska uppnås och därför ska de matcha dessa. Gå igenom alla framgångskriterier och tryck på "utveckla". Skriv in förslagen som är relevanta för översvämning.
+      </div>
+    </div>
+    <a href="/workshop1C"><button class="button is-primary is-rounded is-right">Nästa</button></a>
+  </div>
+
+<div class="column">
+    <h3 class="title is-3">&nbsp;&nbsp;</h3>
+  <div class="box">
+    <h4 class="title is-4">Framgångskriterier</h4>
+    <div class="notification"><p>Fokusfrågan: <i> {{ city.focus }}</i></p></div>
+
+    <p></p>
+
+    {% for cr in city.criteria_set.all %}
+    <div class="box">
+
+      <p><b>{{ cr.name }}</b></p>
+      <p>{{ cr.description }}</p>
+      <button class="button is-small is-primary is-rounded utv" data-id="{{ cr.id }}">Utveckla</button>
+      <button class="button is-small is-link is-rounded edt" data-id="{{ cr.id }}">Ändra</button>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+
+
+</div>
+
+<script type="text/javascript">
+
+    function map_init(map, options) {
+        // get point lat and lon
+        var lon = "{{ city.location.x }}";
+        var lat = "{{ city.location.y }}";
+        // zoom to point & add it to map
+        map.setView([lat, lon], 14);
+    }
+
+    $(document).on('click', '.utv', function() {
+    var id = $(this).data('id');
+    if (id) {
+        window.location = '/kriterium/' + id;
+    }})
+
+    $(document).on('click', '.edt', function() {
+    var id = $(this).data('id');
+    if (id) {
+        window.location = '/edit/kriteria/' + id;
+    }})
+
+
+  </script>
+
+{% endblock %}

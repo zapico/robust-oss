@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-half">
+    <div class="box">
+      <h2 class="title is-3">Definiera Fokusfråga</h2>
+      <div class="notification is-info"><b>Fokusfrågan</b> är målet med att planera för det utvalda området. Tänk på att frågan behöver vara kopplad till översvämning och vara något som deltagarna upplever viktigt. Skriv gärna upp ett första förslag på fråga på en whiteboard/blädderblock/smartboard och låt deltagarna ändra i den tills alla är nöjda.</div>
+
+      <div class="field">
+        <div class="control">
+          <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+          </div>
+        </div>
+        <button class="button is-success is-fullwidth is-medium mt-5" type="submit">Spara</button>
+      </div>
+      <a href="/edit/information"><button class="button is-info is-rounded"><i class="fa-solid fa-angle-left"></i>&nbsp; Tillbaka</button></a>
+    </div>
+</div>
+
+{% endblock %}

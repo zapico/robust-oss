@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+  <div class="columns">
+    <div class="column is-half">
+      <div class="box">
+        <h3 class="title is-3">Robusta beslutsmetoder med hänsyn till översvämning</h3>
+
+        <h5 class="title is-5">För mer information om projektet och öppet information om hur vägledningen fungerar gå till projektets hemsida: <a href="https://robustklimat.se"> Robustklimat.se</a></h5>
+
+        <h5 class="title is-5">Är ni intresserad att testa vägledningen, har ni problem att logga in eller behöver support? <a href="mailto:info@robustklimat.se">Kontakta oss</a></h5>
+      </div>
+    </div>
+    <div class="column is-half">
+      <div class="box">
+        <h2 class="title is-3">Login</h2>
+        {% if form.errors %}
+          <p>Ditt användarnamn och lösenord matchar inte, försök igen.</p>
+        {% endif %}
+        <div class="field">
+          <div class="control">
+            <form method="post" action="{% url 'login' %}">
+              {% csrf_token %}
+              <p>Användarnamn</p>
+              <input class="input" type="text" name="username">
+              <br/><br/><p>Lösenord</p>
+              <input class="input" type="password" name="password">
+            </div>
+          </div>
+          <button class="button is-success is-medium mt-5" type="submit">Logga in</button>
+        </div>
+        </div>
+      </div>
+
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+
+  <div class="column is-half">
+  <h3 class="title is-3">Workshop 3</h3>
+  <div class="box">
+    <h2 class="title is-4">3A. Handlingsvägar</h2>
+    <div class="notification is-info">
+    <p>Skapa handlingsvägar för området som beskriver bästa möjliga åtgärdssekvens som är möjlig för att skydda hela området. Diskutera antaganden ni gjort avseende åtgärdernas effektiva skyddskapacitet och justera ifall det behövs.</p>
+    </div>
+    <a href="/pathway"><button class="button is-link is-medium" type="submit">Generella handlingsvägar</button></a>
+    <br/><br/>
+    <div class="notification is-info">
+    <p>Navigera genom alla era skapade objekt. Skapa en handlingsväg för varje plats som beskriver bästa möjliga åtgärdssekvens som är möjlig för att skydda platsen. Diskutera antaganden ni gjort avseende åtgärdernas effektiva skyddskapacitet och justera ifall det behövs.</p>
+    </div>
+    <a href="/karta"><button class="button is-link  is-medium" type="submit">Alla sårbara platser</button></a>
+  </div>
+</div>
+  <div class="column">
+    <h3 class="title is-3">&nbsp;</h3>
+  <div class="box">
+    <h2 class="title is-4">3B. Uppföljning</h2>
+    <div class="notification is-primary">
+    <p>Diskutera hur resultaten som kommit fram kan användas och omhändertas i kommunen. Frågor som man ni kan behandla är vem/vilka som ansvarar för resultaten kommer in i rätt processer och vilka dessa processer är; när man behöver uppdatera handlingsvägarna och vilka som bör göra detta; och vem/vilka som bör bevaka kunskapsfronten inom klimatutvecklingen för att ”larma” när man närmar sig en kritisk punkt då det är dags att vidta nya åtgärder. Denna diskussion dokumenteras på denna sida.</p>
+    </div>
+    {% if city.followup %}
+    <p>{{city.followup}}</p>
+    {%endif%}
+    <div class="field">
+      <div class="control">
+        <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+        </div>
+      </div>
+      {% if city.followup %}
+      <button class="button is-success is-fullwidth is-medium mt-5" type="submit">Ändra</button>
+      {%else%}
+      <button class="button is-success is-fullwidth is-medium mt-5" type="submit">Spara</button>
+      {%endif%}
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

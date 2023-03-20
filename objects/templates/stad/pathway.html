@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block header %}
+  {% load leaflet_tags %}
+  {% leaflet_css %}
+  {% leaflet_js %}
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+
+<div class="column is-one-third">
+  <div class="box">
+    <h2 class="title is-2">Handlingsvägar</h2>
+    <div class="notification is-small">Skapa en handlingsväg för hela området. Klicka på respektive sårbar plats för att justera åtgärder eller skapa platsspecifika handlingsvägar.</div>
+    <h4 class="title is-4">Sårbara platser: {{city.object_set.all.count}} st</h4>
+    {%for ob in allobjects%}
+      <div class="tags has-addons" style="margin-bottom:0px;">
+        <a href="/pathways/{{ob.id}}"><span class="tag is-info">{{ob.name}}</span></a>
+        <span class="tag"> {{ob.margin}} meter</span>
+        {% if ob.need == 1 %}
+          <span class="tag is-warning">Egen åtgärd</span>
+        {% endif %}
+        {% if ob.need == 2 %}
+          <span class="tag is-danger">Ingen åtgärd</span>
+        {% endif %}
+      </div>
+    {%endfor%}
+  </div>
+</div>
+
+<div class="column">
+  <div class="box">
+
+      {% autoescape off %}
+      {{ plot_path }}
+      {% endautoescape %}
+      {%for path in paths%}
+        <div class="event_box">
+          <p>{{ path.description }}</p>
+          <div class="control">
+            <div class="tags has-addons"  style="margin-top:5px;"">
+              <span class="tag is-info">{{ path.steg1.name }}</span>
+              {%if path.steg2 %}
+                <span class="tag is-link">></span>
+                <span class="tag is-info">{{ path.steg2.name }}</span>
+              {%endif%}
+              {%if path.steg3 %}
+                <span class="tag is-link">></span>
+                <span class="tag is-info">{{ path.steg3.name }}</span>
+              {%endif%}
+            </div>
+          </div>
+          <div class="control"   style="margin-top:5px;">
+            <div class="tags has-addons">
+              <span class="tag is-primary">Kostnad</span>
+              <span class="tag">{{ path.steg1.cost }}</span>
+              {%if path.steg2 %}
+                <span class="tag">+ {{ path.steg2.cost }}</span>
+              {%endif%}
+              {%if path.steg3 %}
+                <span class="tag">+ {{ path.steg3.cost }}</span>
+              {%endif%}
+              <span class="tag is-primary">Effektivt nivå</span>
+              <span class="tag">{{ path.steg1.level }} m.</span>
+              {%if path.steg2 %}
+                <span class="tag">/ {{ path.steg2.level }} m. </span>
+              {%endif%}
+              {%if path.steg3 %}
+                <span class="tag">/ {{ path.steg3.level }} m. </span>
+              {%endif%}
+              <span class="tag is-primary">Effektivt för:</span>
+              <span class="tag">{{ path.steg1.object.count }} st. /</span>
+              {%if path.steg2 %}
+                <span class="tag">{{ path.steg2.object.count }} st. /</span>
+              {%endif%}
+              {%if path.steg3 %}
+                <span class="tag">{{ path.steg3.object.count }} st. </span>
+              {%endif%}
+              <span class="tag">sårbara platser av total: </span>
+              <span class="tag">{{ city.object_set.count }} st. </span>
+            </div>
+          </div>
+          <div class="buttons is-right">
+          <a href="/pathway/{{path.id}}"><button class="button is-small is-link is-rounded has-text-right"><i class="fa-solid fa-pen"></i>&nbsp; Ändra</button></a>
+          <a href="/tabort/pathway/{{path.id}}"><button class="button is-small is-danger is-rounded has-text-right">Ta bort</button></a>
+          </div>
+        </div>
+      {%endfor%}
+
+      <button class="js-modal-trigger button is-primary is-rounded" data-target="modal-js-example"><i class="fa-solid fa-circle-plus"></i>&nbsp; Lägg till handlingsväg</button>
+
+
+    </div>
+    {% if pathway_id != none %}
+      <div id="modal-js-example" class="modal is-active">
+    {% else %}
+      <div id="modal-js-example" class="modal">
+    {% endif %}
+
+      <div class="modal-background"></div>
+
+      <div class="modal-content">
+        <div class="box">
+          {%if pathway_id%}
+          <h2 class="title is-4">Editera handlingsväg</h2>
+          {%else%}
+          <h2 class="title is-4">Skapa handlingsväg</h2>
+          {%endif%}
+
+          <form method="POST">
+          {% csrf_token %}
+          <span class="tag">Åtgärd 1:</span> <div class="select">{{ form.steg1 }}</div><br/><br/>
+          <span class="tag">Åtgärd 2:</span> <div class="select">{{ form.steg2 }}</div><br/><br/>
+          <span class="tag">Åtgärd 3:</span> <div class="select">{{ form.steg3 }}</div><br/><br/>
+          {{ form.description }}<br/>
+
+          {%if pathway_id%}
+            <button class="button is-info is-rounded" type="submit">Spara handlingsväg</button>
+                    <a href="/pathway"><button class="button is-link is-rounded"">Ångra</button></a>
+          {%else%}
+            <button class="button is-info is-rounded" type="submit">Skapa handlingsväg</button>
+          {%endif%}
+      </form>
+
+      </div>
+
+      <button class="modal-close is-large" aria-label="close"></button>
+    </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+// Functions to open and close a modal
+function openModal($el) {
+  $el.classList.add('is-active');
+}
+
+function closeModal($el) {
+  $el.classList.remove('is-active');
+}
+
+function closeAllModals() {
+  (document.querySelectorAll('.modal') || []).forEach(($modal) => {
+    closeModal($modal);
+  });
+}
+
+// Add a click event on buttons to open a specific modal
+(document.querySelectorAll('.js-modal-trigger') || []).forEach(($trigger) => {
+  const modal = $trigger.dataset.target;
+  const $target = document.getElementById(modal);
+
+  $trigger.addEventListener('click', () => {
+    openModal($target);
+  });
+});
+
+// Add a click event on various child elements to close the parent modal
+(document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
+  const $target = $close.closest('.modal');
+
+  $close.addEventListener('click', () => {
+    closeModal($target);
+  });
+});
+
+// Add a keyboard event to close all modals
+document.addEventListener('keydown', (event) => {
+  const e = event || window.event;
+
+  if (e.keyCode === 27) { // Escape key
+    closeAllModals();
+  }
+});
+
+
+});
+</script>
+
+{% endblock %}

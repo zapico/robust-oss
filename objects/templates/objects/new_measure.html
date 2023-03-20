@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns">
+  <div class="column is-one-quarter">
+    <div class="box">
+      <h2 class="title is-2">Åtgärder</h2>
+      <div class="notification is-small">Generella åtgärder gäller hela området och alla sårbara platser. Platsspecifika åtgärder skapas inne i relevant sårbar plats. Det går också att efterjustera och ta bort generella åtgärder från sårbara platser som de inte fungerar för.</div>
+    </div>
+      <button class="js-modal-trigger button is-primary is-rounded" data-target="modal-js-example"><i class="fa-solid fa-circle-plus"></i>&nbsp; Lägg till generell åtgärd</button>
+  </div>
+  <div class="column">
+    <div class="box">
+      <h2 class="title is-4">Generella åtgärder</h2>
+      {% for ms in measures %}
+      <div class="field is-grouped is-grouped-multiline" style="margin-bottom:0px;">
+
+        <div class="control" >
+          <div class="tags has-addons">
+            <a href="/atgard/{{ms.id}}"><span class="tag" style="width:450px; text-align:left;"><b>{{ms.name|truncatechars:50}}</b></span></a>
+          </div>
+        </div>
+        <div class="control" >
+          <div class="tags has-addons">
+            <span class="tag">Effektivt till:</span>
+            <span class="tag is-info" style="width:60px">{{ms.level}} m.</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    <h2 class="title is-4">Platsspecifika åtgärder</h2>
+    {% for ms in measures_ob %}
+    <div class="field is-grouped is-grouped-multiline" style="margin-bottom:0px;">
+
+      <div class="control" >
+        <div class="tags has-addons" ">
+            <a href="/atgard/{{ms.id}}"><span class="tag"><b>{{ms.name|truncatechars:50}}</b></span></a>
+          <a href="/plats/{{ms.object.first.id}}"><span class="tag is-info">i &nbsp;{{ms.object.first.name}}</span></a>
+
+        </div>
+      </div>
+      <div class="control" >
+        <div class="tags">
+          <a href="/edit/measure/{{ms.id}}"><span class="tag is-link"><i class="fa-solid fa-pen"></i>&nbsp; Ändra<span></a>
+          </div>
+      </div>
+    </div>
+
+
+    {% endfor %}
+    </div>
+  </div>
+
+
+  <div id="modal-js-example" class="modal">
+    <div class="modal-background"></div>
+
+    <div class="modal-content">
+      <div class="box">
+        <h2 class="title is-4">Ny åtgärd för hela området</h2>
+        <div class="control">
+          <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="button is-success is-fullwidth is-medium mt-5"
+            type="submit">Spara
+            </button>
+      </form>
+    </div>
+    </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"></button>
+  </div>
+
+
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  // Functions to open and close a modal
+  function openModal($el) {
+    $el.classList.add('is-active');
+  }
+
+  function closeModal($el) {
+    $el.classList.remove('is-active');
+  }
+
+  function closeAllModals() {
+    (document.querySelectorAll('.modal') || []).forEach(($modal) => {
+      closeModal($modal);
+    });
+  }
+
+  // Add a click event on buttons to open a specific modal
+  (document.querySelectorAll('.js-modal-trigger') || []).forEach(($trigger) => {
+    const modal = $trigger.dataset.target;
+    const $target = document.getElementById(modal);
+
+    $trigger.addEventListener('click', () => {
+      openModal($target);
+    });
+  });
+
+  // Add a click event on various child elements to close the parent modal
+  (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
+    const $target = $close.closest('.modal');
+
+    $close.addEventListener('click', () => {
+      closeModal($target);
+    });
+  });
+
+  // Add a keyboard event to close all modals
+  document.addEventListener('keydown', (event) => {
+    const e = event || window.event;
+
+    if (e.keyCode === 27) { // Escape key
+      closeAllModals();
+    }
+  });
+});
+  </script>
+
+
+{% endblock %}
